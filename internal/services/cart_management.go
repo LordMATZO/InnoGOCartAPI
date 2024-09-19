@@ -1,19 +1,18 @@
 package services
 
 import (
+	injector "innogocartapi/internal/app"
 	"innogocartapi/internal/database"
 	"innogocartapi/internal/models"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"go.uber.org/dig"
 )
 
 func CartCreate(httpContext *gin.Context) {
-	container := dig.New()
 	var cartRepository database.DatabaseRepository
 
-	error := container.Invoke(func(newCartRepository *database.DatabaseRepository) {
+	error := injector.DigContainer.Invoke(func(newCartRepository *database.DatabaseRepository) {
 		cartRepository = *newCartRepository
 	})
 
@@ -38,12 +37,11 @@ func AddToCart(httpContext *gin.Context) {
 }
 
 func DeleteFromCart(httpContext *gin.Context) {
-	container := dig.New()
 	var cartRepository database.DatabaseRepository
 	//cartId := httpContext.Param("cartid")
 	//itemId := httpContext.Param("itemid")
 
-	error := container.Invoke(func(newCartRepository *database.DatabaseRepository) {
+	error := injector.DigContainer.Invoke(func(newCartRepository *database.DatabaseRepository) {
 		cartRepository = *newCartRepository
 	})
 
@@ -61,12 +59,11 @@ func DeleteFromCart(httpContext *gin.Context) {
 }
 
 func ViewCart(httpContext *gin.Context) {
-	container := dig.New()
 	var cartRepository database.DatabaseRepository
 
 	cartId := models.CartId(httpContext.Param("cartid"))
 
-	error := container.Invoke(func(newCartRepository database.DatabaseRepository) {
+	error := injector.DigContainer.Invoke(func(newCartRepository database.DatabaseRepository) {
 		cartRepository = newCartRepository
 	})
 

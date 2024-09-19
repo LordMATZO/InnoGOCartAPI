@@ -23,8 +23,16 @@ type CartConfiguration struct {
 func NewCartConfiguration() *CartConfiguration {
 	var result CartConfiguration
 
-	file, _ := os.ReadFile("configuration.json")
-	json.Unmarshal(file, &result)
+	file, error := os.ReadFile("C:\\GODev\\InnoGOCartAPI\\internal\\config\\cart_configuration.json")
+	if error == nil {
+		error = json.Unmarshal(file, &result)
+
+		if error != nil {
+			panic(error)
+		}
+	} else {
+		panic(error)
+	}
 
 	return &result
 }
