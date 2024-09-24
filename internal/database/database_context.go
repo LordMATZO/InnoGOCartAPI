@@ -4,19 +4,17 @@ import (
 	"innogocartapi/internal/config"
 )
 
-type databaseContext interface {
+type DatabaseContext interface {
 	initConnection() error
 }
 
-type DatabaseContextReference *databaseContext
-
-var databaseContextInstance databaseContext
+var databaseContextInstance DatabaseContext
 
 const (
 	PostgreDatabaseId = iota
 )
 
-func GetDatabaseContext(configuration *config.CartConfiguration) *databaseContext {
+func GetDatabaseContext(configuration *config.CartConfiguration) DatabaseContext {
 	if databaseContextInstance == nil {
 		switch configuration.Database.DatabaseId {
 		case PostgreDatabaseId:
@@ -25,5 +23,5 @@ func GetDatabaseContext(configuration *config.CartConfiguration) *databaseContex
 		}
 	}
 
-	return &databaseContextInstance
+	return databaseContextInstance
 }

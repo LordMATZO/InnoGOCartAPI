@@ -1,6 +1,6 @@
 package models
 
-type CartId string
+type CartId int
 
 type Cart struct {
 	Id    CartId     `json:"id"`

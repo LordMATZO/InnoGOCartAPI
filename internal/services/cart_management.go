@@ -1,81 +1,111 @@
 package services
 
 import (
+	"fmt"
 	injector "innogocartapi/internal/app"
 	"innogocartapi/internal/database"
 	"innogocartapi/internal/models"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
 func CartCreate(httpContext *gin.Context) {
-	var cartRepository database.DatabaseRepository
-
-	error := injector.DigContainer.Invoke(func(newCartRepository *database.DatabaseRepository) {
-		cartRepository = *newCartRepository
+	error := injector.DigContainer.Invoke(func(newCartRepository database.DatabaseRepository) {
+		resultCarts, error := newCartRepository.CartCreate(models.Cart{})
+		fmt.Println(error)
+		if error == nil {
+			httpContext.IndentedJSON(http.StatusOK, resultCarts)
+		} else {
+			httpContext.IndentedJSON(http.StatusInternalServerError, resultCarts)
+		}
 	})
 
 	if error != nil {
 		panic(error)
-	}
-
-	resultCarts, error := cartRepository.CartCreate(models.Cart{})
-
-	if error == nil {
-		httpContext.IndentedJSON(http.StatusOK, resultCarts)
-	} else {
-		httpContext.IndentedJSON(http.StatusInternalServerError, resultCarts)
 	}
 }
 
 func AddToCart(httpContext *gin.Context) {
-	var resultCarts []models.CartItem
-	//cartId := httpContext.Param("cartid")
+	var error error
+	var itemId int
+	var cartId int
+	var quantity int
 
-	httpContext.IndentedJSON(http.StatusOK, resultCarts)
-}
+	cartId, error = strconv.Atoi(httpContext.Param("cartid"))
 
-func DeleteFromCart(httpContext *gin.Context) {
-	var cartRepository database.DatabaseRepository
-	//cartId := httpContext.Param("cartid")
-	//itemId := httpContext.Param("itemid")
+	if error == nil {
+		quantity, error = strconv.Atoi(httpContext.PostForm("quantity"))
 
-	error := injector.DigContainer.Invoke(func(newCartRepository *database.DatabaseRepository) {
-		cartRepository = *newCartRepository
-	})
+		if error == nil {
+			error = injector.DigContainer.Invoke(func(newCartRepository database.DatabaseRepository) {
+				resultCartItem, error := newCartRepository.AddToCart(models.CartItem{
+					Id:       models.CartItemId(itemId),
+					Cart_id:  models.CartId(cartId),
+					Product:  models.Product(httpContext.PostForm("product")),
+					Quantity: quantity})
+
+				if error == nil {
+					httpContext.IndentedJSON(http.StatusOK, resultCartItem)
+				} else {
+					httpContext.IndentedJSON(http.StatusInternalServerError, resultCartItem)
+				}
+			})
+		}
+	}
 
 	if error != nil {
 		panic(error)
 	}
+}
 
-	resultCarts, error := cartRepository.DeleteFromCart(models.Cart{})
+func DeleteFromCart(httpContext *gin.Context) {
+	var error error
+	var itemId int
+	var cartId int
+
+	cartId, error = strconv.Atoi(httpContext.PostForm("cartid"))
 
 	if error == nil {
-		httpContext.IndentedJSON(http.StatusOK, resultCarts)
-	} else {
-		httpContext.IndentedJSON(http.StatusInternalServerError, resultCarts)
+		itemId, error = strconv.Atoi(httpContext.PostForm("itemid"))
+
+		if error == nil {
+			error = injector.DigContainer.Invoke(func(newCartRepository database.DatabaseRepository) {
+				resultCartItem, error := newCartRepository.DeleteFromCart(models.CartItem{
+					Id:      models.CartItemId(itemId),
+					Cart_id: models.CartId(cartId)})
+
+				if error == nil {
+					httpContext.IndentedJSON(http.StatusOK, resultCartItem)
+				} else {
+					httpContext.IndentedJSON(http.StatusInternalServerError, resultCartItem)
+				}
+			})
+		}
+	}
+
+	if error != nil {
+		panic(error)
 	}
 }
 
 func ViewCart(httpContext *gin.Context) {
-	var cartRepository database.DatabaseRepository
+	cartId, error := strconv.Atoi(httpContext.Param("cartid"))
 
-	cartId := models.CartId(httpContext.Param("cartid"))
+	if error == nil {
+		error = injector.DigContainer.Invoke(func(newCartRepository database.DatabaseRepository) {
+			resultCarts, error := newCartRepository.ViewCart(models.Cart{Id: models.CartId(cartId)})
 
-	error := injector.DigContainer.Invoke(func(newCartRepository database.DatabaseRepository) {
-		cartRepository = newCartRepository
-	})
+			if error == nil {
+				httpContext.IndentedJSON(http.StatusOK, resultCarts)
+			} else {
+				httpContext.IndentedJSON(http.StatusInternalServerError, error)
+			}
+		})
+	}
 
 	if error != nil {
 		panic(error)
-	}
-
-	resultCarts, error := cartRepository.ViewCart(models.Cart{Id: cartId})
-
-	if error == nil {
-		httpContext.IndentedJSON(http.StatusOK, resultCarts)
-	} else {
-		httpContext.IndentedJSON(http.StatusInternalServerError, resultCarts)
 	}
 }

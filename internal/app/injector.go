@@ -1,6 +1,7 @@
 package injector
 
 import (
+	"fmt"
 	"innogocartapi/internal/config"
 	"innogocartapi/internal/database"
 
@@ -16,18 +17,18 @@ func initConfiguration() {
 
 func InitInjector() {
 	var error error
-	DigContainer := dig.New()
+	DigContainer = dig.New()
 
 	initConfiguration()
 
-	error = DigContainer.Provide(func(databaseContext database.DatabaseContextReference) database.DatabaseRepository {
+	error = DigContainer.Provide(func(databaseContext database.DatabaseContext) database.DatabaseRepository {
 		return database.NewDatabaseRepository(databaseContext, cartConfiguration.Database.DatabaseId)
 	})
 	if error != nil {
 		panic(error)
 	}
 
-	error = DigContainer.Provide(func(configuration *config.CartConfiguration) database.DatabaseContextReference {
+	error = DigContainer.Provide(func(configuration *config.CartConfiguration) database.DatabaseContext {
 		return database.GetDatabaseContext(configuration)
 	})
 	if error != nil {
@@ -40,4 +41,6 @@ func InitInjector() {
 	if error != nil {
 		panic(error)
 	}
+
+	fmt.Println(fmt.Sprintf("Created %s", DigContainer))
 }

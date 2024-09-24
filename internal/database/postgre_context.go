@@ -9,20 +9,19 @@ import (
 )
 
 type postgreContext struct {
-	db            sqlx.DB
+	db            *sqlx.DB
 	configuration *config.CartConfiguration
 }
 
-func newPostgreContext(configuration *config.CartConfiguration) databaseContext {
+func newPostgreContext(configuration *config.CartConfiguration) *postgreContext {
 	postgreContext := new(postgreContext)
-
 	postgreContext.configuration = configuration
 
 	return postgreContext
 }
 
-func (driver postgreContext) initConnection() error {
-	db, error := sqlx.Connect("postgres", fmt.Sprintf("user=%s dbname=%s sslmode=%s password=%s host=%s",
+func (driver *postgreContext) initConnection() error {
+	db, error := sqlx.Open("postgres", fmt.Sprintf("user=%s dbname=%s sslmode=%s password=%s host=%s",
 		driver.configuration.Database.User,
 		driver.configuration.Database.Name,
 		driver.configuration.Database.SSLMode,
@@ -30,7 +29,7 @@ func (driver postgreContext) initConnection() error {
 		driver.configuration.Database.Host))
 
 	if error == nil {
-		driver.db = *db
+		driver.db = db
 	} else {
 		panic(error)
 	}
