@@ -20,20 +20,34 @@ func (repository *postgreRepository) CartCreate(cart models.Cart) (models.Cart, 
 	return resultCart, nil
 }
 func (repository *postgreRepository) ViewCart(cart models.Cart) (models.Cart, error) {
-	var resultCartId models.CartId
+	var resultCart models.Cart
+	var resultCartItem models.CartItem
+	var resultCartItems []models.CartItem
 
-	rows, error := (*repository).context.db.Query(fmt.Sprintf("select * from cart where id = %d", cart.Id))
+	rows, error := repository.context.db.Queryx(fmt.Sprintf("select * from cart where id = %d", cart.Id))
 
 	if error == nil {
 		for rows.Next() {
-			error = rows.Scan(&resultCartId)
+			error = rows.StructScan(&resultCart)
 			if error != nil {
 				break
 			}
 		}
+
+		rows, error = repository.context.db.Queryx(fmt.Sprintf("select * from cart_item where cart_id = %d", cart.Id))
+
+		for rows.Next() {
+			error = rows.StructScan(&resultCartItem)
+			resultCartItems = append(resultCartItems, resultCartItem)
+			if error != nil {
+				break
+			}
+		}
+
+		resultCart.Items = resultCartItems
 	}
 
-	return models.Cart{Id: resultCartId}, error
+	return resultCart, error
 }
 func (repository *postgreRepository) DeleteFromCart(cartItem models.CartItem) (int64, error) {
 	var sqlResult sql.Result

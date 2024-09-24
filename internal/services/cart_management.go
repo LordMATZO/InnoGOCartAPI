@@ -65,10 +65,10 @@ func DeleteFromCart(httpContext *gin.Context) {
 	var itemId int
 	var cartId int
 
-	cartId, error = strconv.Atoi(httpContext.PostForm("cartid"))
+	cartId, error = strconv.Atoi(httpContext.Param("cartid"))
 
 	if error == nil {
-		itemId, error = strconv.Atoi(httpContext.PostForm("itemid"))
+		itemId, error = strconv.Atoi(httpContext.Param("itemid"))
 
 		if error == nil {
 			error = injector.DigContainer.Invoke(func(newCartRepository database.DatabaseRepository) {
@@ -96,7 +96,7 @@ func ViewCart(httpContext *gin.Context) {
 	if error == nil {
 		error = injector.DigContainer.Invoke(func(newCartRepository database.DatabaseRepository) {
 			resultCarts, error := newCartRepository.ViewCart(models.Cart{Id: models.CartId(cartId)})
-
+			fmt.Println(error)
 			if error == nil {
 				httpContext.IndentedJSON(http.StatusOK, resultCarts)
 			} else {
