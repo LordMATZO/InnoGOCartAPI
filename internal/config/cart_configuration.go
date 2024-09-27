@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-type CartConfiguration struct {
+type cartConfigurationType struct {
 	Server struct {
 		Host string `json:"host"`
 		Port int    `json:"port"`
@@ -20,18 +20,28 @@ type CartConfiguration struct {
 	} `json:"database"`
 }
 
-func NewCartConfiguration() *CartConfiguration {
-	var result CartConfiguration
+type CartConfigurationPonterType *cartConfigurationType
 
-	file, error := os.ReadFile("C:\\GODev\\InnoGOCartAPI\\internal\\config\\cart_configuration.json")
-	if error == nil {
-		error = json.Unmarshal(file, &result)
+var cartConfiguration CartConfigurationPonterType
 
-		if error != nil {
+func NewCartConfiguration() CartConfigurationPonterType {
+	var result cartConfigurationType
+
+	if cartConfiguration == nil {
+		file, error := os.ReadFile("C:\\GODev\\InnoGOCartAPI\\internal\\config\\cart_configuration.json")
+		if error == nil {
+			error = json.Unmarshal(file, &result)
+
+			if error != nil {
+				panic(error)
+			}
+
+			cartConfiguration = &result
+		} else {
 			panic(error)
 		}
 	} else {
-		panic(error)
+		result = *cartConfiguration
 	}
 
 	return &result

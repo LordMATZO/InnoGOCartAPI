@@ -14,7 +14,7 @@ const (
 	PostgreDatabaseId = iota
 )
 
-func GetDatabaseContext(configuration *config.CartConfiguration) DatabaseContext {
+func GetDatabaseContext(configuration config.CartConfigurationPonterType) DatabaseContext {
 	if databaseContextInstance == nil {
 		switch configuration.Database.DatabaseId {
 		case PostgreDatabaseId:

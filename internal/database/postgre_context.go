@@ -10,10 +10,10 @@ import (
 
 type postgreContext struct {
 	db            *sqlx.DB
-	configuration *config.CartConfiguration
+	configuration config.CartConfigurationPonterType
 }
 
-func newPostgreContext(configuration *config.CartConfiguration) *postgreContext {
+func newPostgreContext(configuration config.CartConfigurationPonterType) *postgreContext {
 	postgreContext := new(postgreContext)
 	postgreContext.configuration = configuration
 

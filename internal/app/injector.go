@@ -1,18 +1,17 @@
 package injector
 
 import (
-	"fmt"
 	"innogocartapi/internal/config"
 	"innogocartapi/internal/database"
 
 	"go.uber.org/dig"
 )
 
-var cartConfiguration config.CartConfiguration
+var cartConfiguration config.CartConfigurationPonterType
 var DigContainer *dig.Container
 
 func initConfiguration() {
-	cartConfiguration = *config.NewCartConfiguration()
+	cartConfiguration = config.NewCartConfiguration()
 }
 
 func InitInjector() {
@@ -28,19 +27,17 @@ func InitInjector() {
 		panic(error)
 	}
 
-	error = DigContainer.Provide(func(configuration *config.CartConfiguration) database.DatabaseContext {
+	error = DigContainer.Provide(func(configuration config.CartConfigurationPonterType) database.DatabaseContext {
 		return database.GetDatabaseContext(configuration)
 	})
 	if error != nil {
 		panic(error)
 	}
 
-	error = DigContainer.Provide(func() *config.CartConfiguration {
-		return &cartConfiguration
+	error = DigContainer.Provide(func() config.CartConfigurationPonterType {
+		return cartConfiguration
 	})
 	if error != nil {
 		panic(error)
 	}
-
-	fmt.Println(fmt.Sprintf("Created %s", DigContainer))
 }
